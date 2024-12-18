@@ -1,7 +1,14 @@
-import type { NextConfig } from "next";
+import type { NextConfig } from 'next'
 
 const nextConfig: NextConfig = {
-  /* config options here */
-};
+  images: {
+    domains: [
+      'i.scdn.co', 
+      'image-cdn-ak.spotifycdn.com', 
+      'image-cdn-fa.spotifycdn.com',
+      'mosaic.scdn.co',
+    ],
+  },
+}
 
-export default nextConfig;
+export default nextConfig

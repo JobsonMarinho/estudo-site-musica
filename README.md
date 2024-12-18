@@ -1,36 +1,126 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Spotify Clone
+Este é um projeto de estudo desenvolvido para aprender e praticar React, Next.js 15 e a API do Spotify. O objetivo é criar uma aplicação web que simula algumas funcionalidades do Spotify, como exibir playlists, artistas favoritos e controlar a reprodução de músicas.
 
-## Getting Started
+## Tecnologias Utilizadas
 
-First, run the development server:
+- **React**: Biblioteca JavaScript para construção de interfaces de usuário.
+- **Next.js 15**: Framework React para renderização do lado do servidor e geração de sites estáticos.
+- **Spotify Web SDK**: Biblioteca para integração com a API do Spotify.
+- **Tailwind CSS**: Framework CSS para estilização rápida e responsiva.
+- **Lucide React**: Conjunto de ícones para React.
+- **clsx**: Utilitário para construção condicional de classes CSS.
+- **Tailwind Merge**: Utilitário para mesclar classes Tailwind CSS.
+- **TypeScript**: Superset do JavaScript que adiciona tipagem estática.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+## Funcionalidades
+
+- Autenticação com o Spotify.
+- Exibição de playlists do usuário.
+- Exibição de artistas favoritos do usuário.
+- Controle de reprodução de músicas (play, pause, skip, repeat).
+- Controle de volume.
+- Exibição de informações da música atual.
+
+## Instalação e Execução
+
+Siga os passos abaixo para instalar e executar o projeto localmente.
+
+### Pré-requisitos
+
+- Node.js (versão 14 ou superior).
+- Conta no Spotify Developer e um aplicativo registrado para obter as credenciais da API.
+
+### Passo a Passo
+
+1. **Clone o repositório**
+   ```bash
+   git clone https://github.com/seu-usuario/spotify-clone.git
+   cd spotify-clone
+   ```
+
+2. **Instale as dependências**
+   ```bash
+   npm install
+   ```
+
+3. **Configure as variáveis de ambiente**
+   Crie um arquivo `.env.local` na raiz do projeto e adicione as seguintes variáveis:
+   ```env
+   NEXT_PUBLIC_SPOTIFY_CLIENT_ID=your_spotify_client_id
+   NEXT_PUBLIC_SPOTIFY_CLIENT_SECRET=your_spotify_client_secret
+   ```
+
+4. **Execute o projeto em modo de desenvolvimento**
+   ```bash
+   npm run dev
+   ```
+
+5. **Acesse a aplicação**
+   Abra o navegador e acesse [http://localhost:3000](http://localhost:3000).
+
+## Estrutura do Projeto
+
+A estrutura do projeto está organizada da seguinte forma:
+
+```
+/src
+  /app
+    /components
+      - animated-icon.tsx
+      - artist-card.tsx
+      - content.tsx
+      - favorites-content.tsx
+      - footer.tsx
+      - login-button.tsx
+      - playback-item.tsx
+      - player-control.tsx
+      - sidebar.tsx
+      - signout-button.tsx
+      - user-card.tsx
+    /hooks
+      - useSpotify.ts
+    /services
+      - spotify-api.ts
+    /utils
+      - tailwind-merge.ts
+    - layout.tsx
+    - page.tsx
+    - spotify-provider.tsx
+  /pages
+    - callback.tsx
+    - favorites.tsx
+  - globals.css
+/tailwind.config.ts
+/package.json
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Pacotes Utilizados
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- **clsx**: ^2.1.1
+- **lucide-react**: ^0.468.0
+- **next**: 15.1.1
+- **react**: ^19.0.0
+- **react-dom**: ^19.0.0
+- **spotify-web-sdk**: ^0.7.2
+- **tailwind-merge**: ^2.5.5
+- **@eslint/eslintrc**: ^3
+- **@types/node**: ^20
+- **@types/react**: ^19
+- **@types/react-dom**: ^19
+- **eslint**: ^9
+- **eslint-config-next**: 15.1.1
+- **postcss**: ^8
+- **tailwindcss**: ^3.4.1
+- **typescript**: ^5
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Contribuição
 
-## Learn More
+Este projeto é apenas para fins de estudo e não está aberto para contribuições externas no momento.
 
-To learn more about Next.js, take a look at the following resources:
+## Licença
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Este projeto é licenciado sob a licença MIT. Veja o arquivo LICENSE para mais detalhes.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Desenvolvido por [Jobs](https://github.com/JobsonMarinho/) 🚀
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Se você gostou deste projeto, sinta-se à vontade para dar uma estrela ⭐ no repositório!
