@@ -1,4 +1,5 @@
 # Spotify Clone
+![alt text](image.png)
 Este é um projeto de estudo desenvolvido para aprender e praticar React, Next.js 15 e a API do Spotify. O objetivo é criar uma aplicação web que simula algumas funcionalidades do Spotify, como exibir playlists, artistas favoritos e controlar a reprodução de músicas.
 
 ## Tecnologias Utilizadas
@@ -34,8 +35,8 @@ Siga os passos abaixo para instalar e executar o projeto localmente.
 
 1. **Clone o repositório**
    ```bash
-   git clone https://github.com/seu-usuario/spotify-clone.git
-   cd spotify-clone
+   git clone https://github.com/JobsonMarinho/estudo-site-musica.git
+   cd estudo-site-musica
    ```
 
 2. **Instale as dependências**
