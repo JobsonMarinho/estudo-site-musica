@@ -1,12 +1,16 @@
 import type { Artist } from 'spotify-web-sdk'
 import * as spotify from 'spotify-web-sdk'
 
-export const initSpotify = (token: string) => {
+export const initSpotify: (token: string) => void = (token: string) => {
   spotify.init({ token })
 }
 
-export const getUserAvailableDevices = async () => {
-    return await spotify.getUserAvailableDevices()
+export const isInitialized: () => boolean = () => {
+  return spotify.getToken() !== null
+}
+
+export const getUserAvailableDevices: () => Promise<spotify.Device[]> = async () => {
+  return await spotify.getUserAvailableDevices()
 }
 
 export const playPlaylist = async (token: string,artist: Artist) => {
@@ -22,8 +26,12 @@ export const playPlaylist = async (token: string,artist: Artist) => {
     }).then(async (response) => {
       if (response.status === 404) {
         const devices = await getUserAvailableDevices()
-        if (devices) {
+        if (devices && devices.length > 0) {
           const device = devices[0]
+          if (!device) {
+            alert('No devices available')
+            return
+          }
           const deviceId = device.id
           fetch('https://api.spotify.com/v1/me/player/play', {
             method: 'PUT',
@@ -46,11 +54,11 @@ export const playPlaylist = async (token: string,artist: Artist) => {
     })
   }
 
-export const getCurrentUserCurrentlyPlayingTrack = async () => {
+export const getCurrentUserCurrentlyPlayingTrack: () => Promise<spotify.CurrentlyPlaying> = async () => {
   return await spotify.getCurrentUserCurrentlyPlayingTrack()
-}
+} 
 
-export const getUserPlaybackInformation = async () => {
+export const getUserPlaybackInformation: () => Promise<spotify.CurrentlyPlayingContext> = async () => {
   return await spotify.getUserPlaybackInformation()
 }
 

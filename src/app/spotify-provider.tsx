@@ -1,6 +1,6 @@
 'use client'
 
-import { createContext, useState, useEffect, useCallback } from 'react'
+import { createContext, useState, useEffect, useCallback, useMemo } from 'react'
 import type { Artist, PlaylistSimplified } from 'spotify-web-sdk'
 import { initSpotify } from './services/spotify-api'
 
@@ -32,6 +32,70 @@ export const SpotifyContext = createContext<SpotifyContextType>({
   refreshAccessToken: async () => { },
 })
 
+// Memoize the context value to prevent unnecessary re-renders
+const useSpotifyValue = () => {
+  const [token, setToken] = useState<string>('')
+  const [refreshToken, setRefreshToken] = useState<string | null>(null)
+  const [artists, setArtists] = useState<Artist[] | null>(null)
+  const [playlists, setPlaylists] = useState<PlaylistSimplified[] | null>(null)
+  const [loading, setLoading] = useState<boolean>(false)
+  const [error, setError] = useState<string | null>(null)
+
+  const refreshAccessToken = useCallback(async () => {
+    if (!refreshToken) return
+
+    try {
+      const clientId = process.env.NEXT_PUBLIC_SPOTIFY_CLIENT_ID!
+      const clientSecret = process.env.NEXT_PUBLIC_SPOTIFY_CLIENT_SECRET!
+      const url = 'https://accounts.spotify.com/api/token'
+
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'Authorization': 'Basic ' + btoa(`${clientId}:${clientSecret}`)
+        },
+        body: new URLSearchParams({
+          grant_type: 'refresh_token',
+          refresh_token: refreshToken,
+        })
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to refresh token')
+      }
+
+      const data = await response.json()
+      const newToken = data.access_token
+      setToken(newToken)
+      localStorage.setItem('spotify_token', newToken)
+      initSpotify(newToken)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to refresh token')
+    }
+  }, [refreshToken])
+
+  const contextValue = useMemo(() => ({
+    token,
+    setToken,
+    artists,
+    setArtists,
+    playlists,
+    setPlaylists,
+    loading,
+    setLoading,
+    error,
+    setError,
+    refreshAccessToken
+  }), [token, artists, playlists, loading, error, refreshAccessToken])
+
+  return {
+    contextValue,
+    setToken,
+    setRefreshToken
+  }
+}
+
 export function authenticateSpotify() {
   const clientId = process.env.NEXT_PUBLIC_SPOTIFY_CLIENT_ID!
   const redirectUri = `${window.location.origin}/callback`
@@ -47,16 +111,12 @@ export function authenticateSpotify() {
 }
 
 export default function SpotifyProvider({ children }: { children: React.ReactNode }) {
-  const [token, setToken] = useState<string>('')
-  const [refreshToken, setRefreshToken] = useState<string | null>(null)
-  const [artists, setArtists] = useState<Artist[] | null>(null)
-  const [playlists, setPlaylists] = useState<PlaylistSimplified[] | null>(null)
-  const [loading, setLoading] = useState<boolean>(false)
-  const [error, setError] = useState<string | null>(null)
+  const { contextValue, setToken, setRefreshToken } = useSpotifyValue()
 
   useEffect(() => {
     const storedToken = localStorage.getItem('spotify_token')
     const storedRefreshToken = localStorage.getItem('spotify_refresh_token')
+    
     if (storedToken) {
       setToken(storedToken)
       initSpotify(storedToken)
@@ -65,11 +125,14 @@ export default function SpotifyProvider({ children }: { children: React.ReactNod
       setRefreshToken(storedRefreshToken)
     }
 
-    const hash = window.location.hash
-    if (hash) {
+    const handleTokenFromHash = () => {
+      const hash = window.location.hash
+      if (!hash) return
+
       const params = new URLSearchParams(hash.slice(1))
       const accessToken = params.get('access_token')
       const refreshToken = params.get('refresh_token')
+      
       if (accessToken) {
         setToken(accessToken)
         initSpotify(accessToken)
@@ -81,57 +144,19 @@ export default function SpotifyProvider({ children }: { children: React.ReactNod
         localStorage.setItem('spotify_refresh_token', refreshToken)
       }
     }
-  }, [])
 
-  const refreshAccessToken = useCallback(async () => {
-    if (!refreshToken) return
-
-    const clientId = process.env.NEXT_PUBLIC_SPOTIFY_CLIENT_ID!
-    const clientSecret = process.env.NEXT_PUBLIC_SPOTIFY_CLIENT_SECRET!
-    const url = 'https://accounts.spotify.com/api/token'
-
-    const payload = {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-        'Authorization': 'Basic ' + btoa(`${clientId}:${clientSecret}`)
-      },
-      body: new URLSearchParams({
-        grant_type: 'refresh_token',
-        refresh_token: refreshToken,
-      }),
-    }
-
-    try {
-      const response = await fetch(url, payload)
-      const data = await response.json()
-
-      if (data.access_token) {
-        setToken(data.access_token)
-        initSpotify(data.access_token)
-        localStorage.setItem('spotify_token', data.access_token)
-      }
-      if (data.refresh_token) {
-        setRefreshToken(data.refresh_token)
-        localStorage.setItem('spotify_refresh_token', data.refresh_token)
-      }
-    } catch (err) {
-      setError('Failed to refresh access token')
-      console.error(err)
-    }
-  }, [refreshToken])
+    handleTokenFromHash()
+  }, [setToken, setRefreshToken])
 
   useEffect(() => {
     const interval = setInterval(() => {
-      refreshAccessToken()
+      contextValue.refreshAccessToken()
     }, 3600 * 1000)
     return () => clearInterval(interval)
-  }, [refreshAccessToken])
+  }, [contextValue])
 
   return (
-    <SpotifyContext.Provider value={{
-      token, setToken, artists, setArtists, playlists, setPlaylists, loading, setLoading, error, setError, refreshAccessToken
-    }}>
+    <SpotifyContext.Provider value={contextValue}>
       {children}
     </SpotifyContext.Provider>
   )
