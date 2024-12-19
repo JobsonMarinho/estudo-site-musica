@@ -1,4 +1,4 @@
-import type { Artist } from 'spotify-web-sdk'
+import type { Artist, Device, CurrentlyPlaying, CurrentlyPlayingContext, PrivateUser, PlaylistSimplified, Page } from 'spotify-web-sdk'
 import * as spotify from 'spotify-web-sdk'
 
 export const initSpotify: (token: string) => void = (token: string) => {
@@ -9,20 +9,22 @@ export const isInitialized: () => boolean = () => {
   return spotify.getToken() !== null
 }
 
-export const getUserAvailableDevices: () => Promise<spotify.Device[]> = async () => {
+export const getUserAvailableDevices: () => Promise<Device[]> = async () => {
   return await spotify.getUserAvailableDevices()
 }
 
-export const playPlaylist = async (token: string,artist: Artist) => {
-    await fetch('https://api.spotify.com/v1/me/player/play', {
+export const playPlaylist: (token: string, artist: Artist) => Promise<void> = async (token: string, artist: Artist) => {
+  if (artist.uri) {
+    fetch('https://api.spotify.com/v1/me/player/play', {
       method: 'PUT',
       headers: {
-        Authorization: `Bearer ${token}`,
-        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
       },
       body: JSON.stringify({
         context_uri: artist.uri,
-      }),
+        position_ms: 0
+      })
     }).then(async (response) => {
       if (response.status === 404) {
         const devices = await getUserAvailableDevices()
@@ -36,64 +38,61 @@ export const playPlaylist = async (token: string,artist: Artist) => {
           fetch('https://api.spotify.com/v1/me/player/play', {
             method: 'PUT',
             headers: {
-              Authorization: `Bearer ${token}`,
-              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json'
             },
             body: JSON.stringify({
-              context_uri: artist.uri,
               device_id: deviceId,
-            }),
-          }).then(() => {
-            alert(`Playing playlist on ${device.name}`)
-            resumeUserPlayback(deviceId)
+              context_uri: artist.uri,
+              position_ms: 0
+            })
           })
-        } else {
-          alert('No devices available')
         }
       }
     })
   }
+}
 
-export const getCurrentUserCurrentlyPlayingTrack: () => Promise<spotify.CurrentlyPlaying> = async () => {
+export const getCurrentUserCurrentlyPlayingTrack: () => Promise<CurrentlyPlaying> = async () => {
   return await spotify.getCurrentUserCurrentlyPlayingTrack()
-} 
+}
 
-export const getUserPlaybackInformation: () => Promise<spotify.CurrentlyPlayingContext> = async () => {
+export const getUserPlaybackInformation: () => Promise<CurrentlyPlayingContext> = async () => {
   return await spotify.getUserPlaybackInformation()
 }
 
-export const setVolumeForUserPlayback = async (volume: number) => {
+export const setVolumeForUserPlayback: (volume: number) => Promise<string> = async (volume) => {
   return await spotify.setVolumeForUserPlayback(volume)
 }
 
-export const pauseUserPlayback = async () => {
+export const pauseUserPlayback: () => Promise<string> = async () => {
   return await spotify.pauseUserPlayback()
 }
 
-export const resumeUserPlayback = async (deviceId?: string) => {
+export const resumeUserPlayback: (deviceId?: string) => Promise<string> = async (deviceId) => {
   return await spotify.resumeUserPlayback({ deviceId })
 }
 
-export const skipUserPlaybackToPreviousTrack = async () => {
+export const skipUserPlaybackToPreviousTrack: () => Promise<string> = async () => {
   return await spotify.skipUserPlaybackToPreviousTrack()
 }
 
-export const skipUserPlaybackToNextTrack = async () => {
+export const skipUserPlaybackToNextTrack: () => Promise<string> = async () => {
   return await spotify.skipUserPlaybackToNextTrack()
 }
 
-export const setRepeatModeOnUserPlayback = async (mode: 'off' | 'context' | 'track') => {
+export const setRepeatModeOnUserPlayback: (mode: 'off' | 'context' | 'track') => Promise<string> = async (mode) => {
   return await spotify.setRepeatModeOnUserPlayback(mode)
 }
 
-export const fetchUserProfile = async () => {
+export const fetchUserProfile: () => Promise<PrivateUser> = async () => {
   return await spotify.getCurrentUserProfile()
 }
 
-export const fetchPlaylists = async (limit: number, offset: number = 0) => {
+export const fetchPlaylists: (limit: number, offset: number) => Promise<Page<PlaylistSimplified>> = async (limit, offset) => {
   return await spotify.getCurrentUserPlaylists({ limit, offset })
 }
 
-export const fetchFavoritesArtists = async (offset: number = 0) => {
+export const fetchFavoritesArtists: (offset: number) => Promise<Page<Artist>> = async (offset) => {
   return await spotify.getCurrentUserTopArtists({ limit: 18, offset: offset })
 }
